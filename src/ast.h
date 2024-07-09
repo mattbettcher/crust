@@ -264,27 +264,27 @@ struct Expr {
     };
 };
 
-void *ast_alloc(size_t size);
-void *ast_dup(const void *src, size_t size);
+static void *ast_alloc(size_t size);
+static void *ast_dup(const void *src, size_t size);
 
-Decl *new_decl(DeclKind kind, SrcPos pos, const char *name);
-Decl *new_decl_func(SrcPos pos, const char *name, FuncParam *params, size_t num_params, Typespec *ret_type);
+static Decl *new_decl(DeclKind kind, SrcPos pos, const char *name);
+static Decl *new_decl_func(SrcPos pos, const char *name, FuncParam *params, size_t num_params, Typespec *ret_type);
 
-Expr *new_expr(ExprKind kind, SrcPos pos);
-Expr *new_expr_paren(SrcPos pos, Expr *expr);
-Expr *new_expr_binary(SrcPos pos, TokenKind op, Expr *left, Expr *right);
-Expr *new_expr_int(SrcPos pos, unsigned long long val, TokenMod mod, TokenSuffix suffix);
-Expr *new_expr_float(SrcPos pos, const char *start, const char *end, double val, TokenSuffix suffix);
-Expr *new_expr_str(SrcPos pos, const char *val, TokenMod mod);
-Expr *new_expr_name(SrcPos pos, const char *name);
-Expr *new_expr_modify(SrcPos pos, TokenKind op, bool post, Expr *expr);
-Expr *new_expr_unary(SrcPos pos, TokenKind op, Expr *expr);
-Expr *new_expr_tuple(SrcPos pos, Expr **args, size_t num_args);
-Expr *new_expr_call(SrcPos pos, Expr *expr, Expr **args, size_t num_args);
-Expr *new_expr_index(SrcPos pos, Expr *expr, Expr *index);
-Expr *new_expr_field(SrcPos pos, Expr *expr, const char *name);
+static Expr *new_expr(ExprKind kind, SrcPos pos);
+static Expr *new_expr_paren(SrcPos pos, Expr *expr);
+static Expr *new_expr_binary(SrcPos pos, TokenKind op, Expr *left, Expr *right);
+static Expr *new_expr_int(SrcPos pos, unsigned long long val, TokenMod mod, TokenSuffix suffix);
+static Expr *new_expr_float(SrcPos pos, const char *start, const char *end, double val, TokenSuffix suffix);
+static Expr *new_expr_str(SrcPos pos, const char *val, TokenMod mod);
+static Expr *new_expr_name(SrcPos pos, const char *name);
+static Expr *new_expr_modify(SrcPos pos, TokenKind op, bool post, Expr *expr);
+static Expr *new_expr_unary(SrcPos pos, TokenKind op, Expr *expr);
+static Expr *new_expr_tuple(SrcPos pos, Expr **args, size_t num_args);
+static Expr *new_expr_call(SrcPos pos, Expr *expr, Expr **args, size_t num_args);
+static Expr *new_expr_index(SrcPos pos, Expr *expr, Expr *index);
+static Expr *new_expr_field(SrcPos pos, Expr *expr, const char *name);
 
 
-Typespec *new_typespec(TypespecKind kind, SrcPos pos);
-Typespec *new_typespec_name(SrcPos pos, const char **names, size_t num_names);
-Typespec *new_typespec_tuple(SrcPos pos, Typespec **fields, size_t num_fields);
+static Typespec *new_typespec(TypespecKind kind, SrcPos pos);
+static Typespec *new_typespec_name(SrcPos pos, const char **names, size_t num_names);
+static Typespec *new_typespec_tuple(SrcPos pos, Typespec **fields, size_t num_fields);

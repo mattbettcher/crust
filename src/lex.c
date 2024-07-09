@@ -1,8 +1,8 @@
 #include "lex.h"
 
-SrcPos pos_builtin = {.name = "<builtin>"};
+static SrcPos pos_builtin = {.name = "<builtin>"};
 
-const char *token_suffix_names[] = {
+static const char *token_suffix_names[] = {
     [SUFFIX_NONE] = "",
     [SUFFIX_D] = "d",
     [SUFFIX_U] = "u",
@@ -12,7 +12,7 @@ const char *token_suffix_names[] = {
     [SUFFIX_ULL] = "ull",
 };
 
-const char *token_kind_names[] = {
+static const char *token_kind_names[] = {
     [TOKEN_EOF] = "EOF",
     [TOKEN_COLON] = ":",
     [TOKEN_LPAREN] = "(",
@@ -69,7 +69,7 @@ const char *token_kind_names[] = {
     [TOKEN_COLON_ASSIGN] = ":=",
 };
 
-TokenKind assign_token_to_binary_token[NUM_TOKEN_KINDS] = {
+static TokenKind assign_token_to_binary_token[NUM_TOKEN_KINDS] = {
     [TOKEN_ADD_ASSIGN] = TOKEN_ADD,
     [TOKEN_SUB_ASSIGN] = TOKEN_SUB,
     [TOKEN_OR_ASSIGN] = TOKEN_OR,
@@ -82,7 +82,7 @@ TokenKind assign_token_to_binary_token[NUM_TOKEN_KINDS] = {
     [TOKEN_MOD_ASSIGN] = TOKEN_MOD,
 };
 
-uint8_t char_to_digit[256] = {
+static uint8_t char_to_digit[256] = {
     ['0'] = 0,
     ['1'] = 1,
     ['2'] = 2,
@@ -101,7 +101,7 @@ uint8_t char_to_digit[256] = {
     ['f'] = 15, ['F'] = 15,
 };
 
-char escape_to_char[256] = {
+static char escape_to_char[256] = {
     ['0'] = '\0',
     ['\''] = '\'',
     ['"'] = '"',
@@ -116,7 +116,8 @@ char escape_to_char[256] = {
 
 #define KEYWORD(name) name##_keyword = str_intern(#name); buf_push(keywords, name##_keyword)
 
-void init_keywords(void) {
+static void 
+init_keywords(void) {
     static bool inited;
     if (inited) {
         return;
@@ -167,11 +168,13 @@ void init_keywords(void) {
 
 #undef KEYWORD
 
-bool is_keyword_name(const char *name) {
+static bool 
+is_keyword_name(const char *name) {
     return first_keyword <= name && name <= last_keyword;
 }
 
-const char *token_kind_name(TokenKind kind) {
+static const char *
+token_kind_name(TokenKind kind) {
     if (kind < sizeof(token_kind_names)/sizeof(*token_kind_names)) {
         return token_kind_names[kind];
     } else {
@@ -179,7 +182,8 @@ const char *token_kind_name(TokenKind kind) {
     }
 }
 
-void warning(SrcPos pos, const char *fmt, ...) {
+static void 
+warning(SrcPos pos, const char *fmt, ...) {
     if (pos.name == NULL) {
         pos = pos_builtin;
     }
@@ -191,7 +195,8 @@ void warning(SrcPos pos, const char *fmt, ...) {
     va_end(args);
 }
 
-void error(SrcPos pos, const char *fmt, ...) {
+static void 
+error(SrcPos pos, const char *fmt, ...) {
     if (pos.name == NULL) {
         pos = pos_builtin;
     }
@@ -203,7 +208,8 @@ void error(SrcPos pos, const char *fmt, ...) {
     va_end(args);
 }
 
-const char *token_info(void) {
+static const char *
+token_info(void) {
     if (token.kind == TOKEN_NAME || token.kind == TOKEN_KEYWORD) {
         return token.name;
     } else {
@@ -211,7 +217,8 @@ const char *token_info(void) {
     }
 }
 
-void scan_int(void) {
+static void 
+scan_int(void) {
     int base = 10;
     const char *start_digits = stream;
     if (*stream == '0') {
@@ -279,7 +286,8 @@ void scan_int(void) {
     }
 }
 
-void scan_float(void) {
+static void 
+scan_float(void) {
     const char *start = stream;
     while (isdigit(*stream)) {
         stream++;
@@ -314,7 +322,8 @@ void scan_float(void) {
     }
 }
 
-int scan_hex_escape(void) {
+static int 
+scan_hex_escape(void) {
     assert(*stream == 'x');
     stream++;
     int val = char_to_digit[(unsigned char)*stream];
@@ -335,7 +344,8 @@ int scan_hex_escape(void) {
     return val;
 }
 
-void scan_char(void) {
+static void 
+scan_char(void) {
     assert(*stream == '\'');
     stream++;
     int val = 0;
@@ -369,7 +379,8 @@ void scan_char(void) {
     token.mod = MOD_CHAR;
 }
 
-void scan_str(void) {
+static void 
+scan_str(void) {
     assert(*stream == '"');
     stream++;
     char *str = NULL;
@@ -455,7 +466,8 @@ void scan_str(void) {
         } \
         break;
 
-void next_token(void) {
+static void 
+next_token(void) {
 repeat:
     token.start = stream;
     token.mod = 0;
@@ -627,7 +639,8 @@ repeat:
 #undef CASE2
 #undef CASE3
 
-void init_stream(const char *name, const char *buf) {
+static void 
+init_stream(const char *name, const char *buf) {
     stream = buf;
     line_start = stream;
     token.pos.name = name ? name : "<string>";
@@ -635,23 +648,28 @@ void init_stream(const char *name, const char *buf) {
     next_token();
 }
 
-bool is_token(TokenKind kind) {
+static bool 
+is_token(TokenKind kind) {
     return token.kind == kind;
 }
 
-bool is_token_eof(void) {
+static bool 
+is_token_eof(void) {
     return token.kind == TOKEN_EOF;
 }
 
-bool is_token_name(const char *name) {
+static bool 
+is_token_name(const char *name) {
     return token.kind == TOKEN_NAME && token.name == name;
 }
 
-bool is_keyword(const char *name) {
+static bool 
+is_keyword(const char *name) {
     return is_token(TOKEN_KEYWORD) && token.name == name;
 }
 
-bool match_keyword(const char *name) {
+static bool 
+match_keyword(const char *name) {
     if (is_keyword(name)) {
         next_token();
         return true;
@@ -660,7 +678,8 @@ bool match_keyword(const char *name) {
     }
 }
 
-bool match_token(TokenKind kind) {
+static bool 
+match_token(TokenKind kind) {
     if (is_token(kind)) {
         next_token();
         return true;
@@ -669,7 +688,8 @@ bool match_token(TokenKind kind) {
     }
 }
 
-bool expect_token(TokenKind kind) {
+static bool 
+expect_token(TokenKind kind) {
     if (is_token(kind)) {
         next_token();
         return true;

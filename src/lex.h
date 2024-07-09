@@ -158,29 +158,29 @@ Token token;
 const char *stream;
 const char *line_start;
 
-void init_keywords(void);
-bool is_keyword_name(const char *name);
-const char *token_kind_name(TokenKind kind);
-void warning(SrcPos pos, const char *fmt, ...);
-void error(SrcPos pos, const char *fmt, ...);
+static void init_keywords(void);
+static bool is_keyword_name(const char *name);
+static const char *token_kind_name(TokenKind kind);
+static void warning(SrcPos pos, const char *fmt, ...);
+static void error(SrcPos pos, const char *fmt, ...);
 
 #define fatal_error(...) (error(__VA_ARGS__), exit(1))
 #define error_here(...) (error(token.pos, __VA_ARGS__))
 #define warning_here(...) (error(token.pos, __VA_ARGS__))
 #define fatal_error_here(...) (error_here(__VA_ARGS__), exit(1)) // should be abort()
 
-const char *token_info(void);
-void scan_int(void);
-void scan_float(void);
-int scan_hex_escape(void);
-void scan_char(void);
-void scan_str(void);
-void next_token(void);
-void init_stream(const char *name, const char *buf);
-bool is_token(TokenKind kind);
-bool is_token_eof(void);
-bool is_token_name(const char *name);
-bool is_keyword(const char *name);
-bool match_keyword(const char *name);
-bool match_token(TokenKind kind);
-bool expect_token(TokenKind kind);
+static const char *token_info(void);
+static void scan_int(void);
+static void scan_float(void);
+static int scan_hex_escape(void);
+static void scan_char(void);
+static void scan_str(void);
+static void next_token(void);
+static void init_stream(const char *name, const char *buf);
+static bool is_token(TokenKind kind);
+static bool is_token_eof(void);
+static bool is_token_name(const char *name);
+static bool is_keyword(const char *name);
+static bool match_keyword(const char *name);
+static bool match_token(TokenKind kind);
+static bool expect_token(TokenKind kind);

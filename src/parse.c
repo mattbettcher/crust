@@ -3,7 +3,8 @@
 // Already parsed
 // v  v  v
 // ( type, type, ...)
-Typespec *parse_type_tuple(Typespec *type) {
+static Typespec *
+parse_type_tuple(Typespec *type) {
     SrcPos pos = token.pos;
     Typespec **fields = NULL;
     buf_push(fields, type);
@@ -19,7 +20,8 @@ Typespec *parse_type_tuple(Typespec *type) {
 }
 
 // name | name.name | '(' type , tuple ')'
-Typespec *parse_type_base(void) {
+static Typespec *
+parse_type_base(void) {
     if (is_token(TOKEN_NAME)) {
         SrcPos pos = token.pos;
         const char **names = NULL;
@@ -45,21 +47,24 @@ Typespec *parse_type_base(void) {
 }
 
 // todo: take some flags to limit what types are allowed
-Typespec *parse_type(void) {
+static Typespec *
+parse_type(void) {
     Typespec *type = parse_type_base();
-    SrcPos pos = token.pos;
+    //SrcPos pos = token.pos;
     // todo: subscript/array and bracket and pointers
     return type;
 }
 
-const char *parse_name(void) {
+static const char *
+parse_name(void) {
     const char *name = token.name;
     expect_token(TOKEN_NAME);
     return name;
 }
 
 
-FuncParam parse_decl_func_param(void) {
+static FuncParam 
+parse_decl_func_param(void) {
     SrcPos pos = token.pos;
     const char *name = parse_name();
     expect_token(TOKEN_COLON);
@@ -68,7 +73,8 @@ FuncParam parse_decl_func_param(void) {
 }
 
 // 'const'? name (':' type)? ('=' expr)?
-GenericParam parse_decl_generic_param(bool is_fn_decl) {
+static GenericParam 
+parse_decl_generic_param(bool is_fn_decl) {
     SrcPos pos = token.pos;
     bool is_const = match_keyword(const_keyword);
     const char *name = parse_name();
@@ -87,7 +93,8 @@ GenericParam parse_decl_generic_param(bool is_fn_decl) {
 // Already parsed
 // v  
 // fn name ('<' generic_param_list '>')? '(' param_list ')' ('->' type)? '{' block '}'
-Decl *parse_decl_fn(SrcPos pos) {
+static Decl *
+parse_decl_fn(SrcPos pos) {
     const char *name = parse_name();
     // generics go here
     GenericParam *generics = NULL;
@@ -118,7 +125,8 @@ Decl *parse_decl_fn(SrcPos pos) {
     return decl;
 }
 
-Expr *parse_expr_operand(void) {
+static Expr *
+parse_expr_operand(void) {
     SrcPos pos = token.pos;
     if (is_token(TOKEN_INT)) {
         unsigned long long val = token.int_val;
@@ -165,7 +173,8 @@ Expr *parse_expr_operand(void) {
     }
 }
 
-Expr *parse_expr_base(void) {
+static Expr *
+parse_expr_base(void) {
     Expr *expr = parse_expr_operand();
     while (is_token(TOKEN_LPAREN) || is_token(TOKEN_LBRACKET) || is_token(TOKEN_DOT) || is_token(TOKEN_INC) || is_token(TOKEN_DEC)) {
         SrcPos pos = token.pos;
@@ -198,7 +207,8 @@ Expr *parse_expr_base(void) {
     return expr;
 }
 
-bool is_unary_op(void) {
+static bool 
+is_unary_op(void) {
     return
         is_token(TOKEN_ADD) ||
         is_token(TOKEN_SUB) ||
@@ -210,7 +220,8 @@ bool is_unary_op(void) {
         is_token(TOKEN_DEC);
 }
 
-Expr *parse_expr_unary(void) {
+static Expr *
+parse_expr_unary(void) {
     if (is_unary_op()) {
         SrcPos pos = token.pos;
         TokenKind op = token.kind;
@@ -225,11 +236,13 @@ Expr *parse_expr_unary(void) {
     }
 }
 
-bool is_mul_op(void) {
+static bool 
+is_mul_op(void) {
     return TOKEN_FIRST_MUL <= token.kind && token.kind <= TOKEN_LAST_MUL;
 }
 
-Expr *parse_expr_mul(void) {
+static Expr *
+parse_expr_mul(void) {
     Expr *expr = parse_expr_unary();
     while (is_mul_op()) {
         SrcPos pos = token.pos;
@@ -240,11 +253,13 @@ Expr *parse_expr_mul(void) {
     return expr;
 }
 
-bool is_add_op(void) {
+static bool 
+is_add_op(void) {
     return TOKEN_FIRST_ADD <= token.kind && token.kind <= TOKEN_LAST_ADD;
 }
 
-Expr *parse_expr_add(void) {
+static Expr *
+parse_expr_add(void) {
     Expr *expr = parse_expr_mul();
     while (is_add_op()) {
         SrcPos pos = token.pos;
@@ -255,11 +270,13 @@ Expr *parse_expr_add(void) {
     return expr;
 }
 
-bool is_cmp_op(void) {
+static bool 
+is_cmp_op(void) {
     return TOKEN_FIRST_CMP <= token.kind && token.kind <= TOKEN_LAST_CMP;
 }
 
-Expr *parse_expr_cmp(void) {
+static Expr *
+parse_expr_cmp(void) {
     Expr *expr = parse_expr_add();
     while (is_cmp_op()) {
         SrcPos pos = token.pos;
@@ -270,7 +287,8 @@ Expr *parse_expr_cmp(void) {
     return expr;
 }
 
-Expr *parse_expr_and(void) {
+static Expr *
+parse_expr_and(void) {
     Expr *expr = parse_expr_cmp();
     while (match_token(TOKEN_AND_AND)) {
         SrcPos pos = token.pos;
@@ -279,7 +297,8 @@ Expr *parse_expr_and(void) {
     return expr;
 }
 
-Expr *parse_expr_or(void) {
+static Expr *
+parse_expr_or(void) {
     Expr *expr = parse_expr_and();
     while (match_token(TOKEN_OR_OR)) {
         SrcPos pos = token.pos;
@@ -288,11 +307,13 @@ Expr *parse_expr_or(void) {
     return expr;
 }
 
-Expr *parse_expr(void) {
+static Expr *
+parse_expr(void) {
     return parse_expr_or();
 }
 
-Expr *parse_paren_expr(void) {
+static Expr *
+parse_paren_expr(void) {
     expect_token(TOKEN_LPAREN);
     Expr *expr = parse_expr();
     expect_token(TOKEN_RPAREN);
