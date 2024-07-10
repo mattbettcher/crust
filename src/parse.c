@@ -15,7 +15,7 @@ parse_type_tuple(Typespec *type) {
             break;
         }
     }
-    expect_token(TOKEN_RPAREN);
+    expect_token(TOKEN_RPAREN, (TokenKind []) {0}, false);
     return new_typespec_tuple(pos, fields, buf_len(fields));
 }
 
@@ -39,7 +39,7 @@ parse_type_base(void) {
         if (match_token(TOKEN_COMMA)) {
             return parse_type_tuple(type);
         }
-        expect_token(TOKEN_RPAREN);
+        expect_token(TOKEN_RPAREN, (TokenKind []) {0}, false);
         return type;
     }
     fatal_error_here("Unexpected token %s in type", token_info());
@@ -58,7 +58,7 @@ parse_type(void) {
 static const char *
 parse_name(void) {
     const char *name = token.name;
-    expect_token(TOKEN_NAME);
+    expect_token(TOKEN_NAME, (TokenKind []) {0}, false);
     return name;
 }
 
@@ -67,7 +67,7 @@ static FuncParam
 parse_decl_func_param(void) {
     SrcPos pos = token.pos;
     const char *name = parse_name();
-    expect_token(TOKEN_COLON);
+    expect_token(TOKEN_COLON, (TokenKind []) {0}, false);
     Typespec *type = parse_type();
     return (FuncParam){pos, name, type};
 }
@@ -85,7 +85,7 @@ parse_decl_generic_param(bool is_fn_decl) {
     if (match_token(TOKEN_EQ) && !is_fn_decl) {
         // todo: parse default generic value here if not an fn
     } else {
-        fatal_error_here("defaults for const parameters are only allowed in `struct`, `enum`, `type`, or `trait` definitions");
+        //fatal_error_here("defaults for const parameters are only allowed in `struct`, `enum`, `type`, or `trait` definitions");
     }
     return (GenericParam){pos, is_const, name, type};
 }
@@ -103,9 +103,9 @@ parse_decl_fn(SrcPos pos) {
         while (match_token(TOKEN_COMMA)) {
             buf_push(generics, parse_decl_generic_param(true));
         }
-        expect_token(TOKEN_GT);
+        expect_token(TOKEN_GT, (TokenKind []) {TOKEN_LPAREN, 0}, true);
     }
-    expect_token(TOKEN_LPAREN);
+    expect_token(TOKEN_LPAREN, (TokenKind []) {TOKEN_RPAREN, TOKEN_RARROW, TOKEN_LBRACE, 0}, true);
     FuncParam *params = NULL;
     if (!is_token(TOKEN_RPAREN)) {
         buf_push(params, parse_decl_func_param());
@@ -113,14 +113,14 @@ parse_decl_fn(SrcPos pos) {
             buf_push(params, parse_decl_func_param());
         }
     }
-    expect_token(TOKEN_RPAREN);
+    expect_token(TOKEN_RPAREN, (TokenKind []) {TOKEN_RARROW, TOKEN_LBRACE, 0}, true);
     Typespec *ret_type = NULL;
     if (match_token(TOKEN_RARROW)) {
         ret_type = parse_type();
     }
-    expect_token(TOKEN_LBRACE);
+    expect_token(TOKEN_LBRACE, (TokenKind []) {TOKEN_RARROW, TOKEN_LBRACE, 0}, true);
     // BLOCK !
-    expect_token(TOKEN_RBRACE);
+    expect_token(TOKEN_RBRACE, (TokenKind []) {0}, false);
     Decl *decl = new_decl_func(pos, name, params, buf_len(params), ret_type);
     return decl;
 }
@@ -161,10 +161,10 @@ parse_expr_operand(void) {
                     buf_push(args, parse_expr());
                 }
             }
-            expect_token(TOKEN_RPAREN);
+            expect_token(TOKEN_RPAREN, (TokenKind []) {0}, false);
             return new_expr_tuple(pos, args, buf_len(args));
         } else {
-            expect_token(TOKEN_RPAREN);
+            expect_token(TOKEN_RPAREN, (TokenKind []) {0}, false);
             return new_expr_paren(pos, expr);
         }
     } else {
@@ -186,16 +186,16 @@ parse_expr_base(void) {
                     buf_push(args, parse_expr());
                 }
             }
-            expect_token(TOKEN_RPAREN);
+            expect_token(TOKEN_RPAREN, (TokenKind []) {0}, false);
             expr = new_expr_call(pos, expr, args, buf_len(args));
         } else if (match_token(TOKEN_LBRACKET)) {
             Expr *index = parse_expr();
-            expect_token(TOKEN_RBRACKET);
+            expect_token(TOKEN_RBRACKET, (TokenKind []) {0}, false);
             expr = new_expr_index(pos, expr, index);
         } else if (is_token(TOKEN_DOT)) {
             next_token();
             const char *field = token.name;
-            expect_token(TOKEN_NAME);
+            expect_token(TOKEN_NAME, (TokenKind []) {0}, false);
             expr = new_expr_field(pos, expr, field);
         } else {
             assert(is_token(TOKEN_INC) || is_token(TOKEN_DEC));
@@ -314,8 +314,8 @@ parse_expr(void) {
 
 static Expr *
 parse_paren_expr(void) {
-    expect_token(TOKEN_LPAREN);
+    expect_token(TOKEN_LPAREN, (TokenKind []) {0}, false);
     Expr *expr = parse_expr();
-    expect_token(TOKEN_RPAREN);
+    expect_token(TOKEN_RPAREN, (TokenKind []) {0}, false);
     return expr;
 }

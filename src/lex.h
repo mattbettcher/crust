@@ -154,9 +154,9 @@ typedef struct Token {
     };
 } Token;
 
-Token token;
-const char *stream;
-const char *line_start;
+static Token token;
+static const char *stream;
+static const char *line_start;
 
 static void init_keywords(void);
 static bool is_keyword_name(const char *name);
@@ -183,4 +183,4 @@ static bool is_token_name(const char *name);
 static bool is_keyword(const char *name);
 static bool match_keyword(const char *name);
 static bool match_token(TokenKind kind);
-static bool expect_token(TokenKind kind);
+static bool expect_token(TokenKind kind, TokenKind *next_token_kind, bool is_recoverable);

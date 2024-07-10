@@ -2,12 +2,14 @@
 // headers
 #include "stdafx.h"
 #include "common.h"
+#include "error.h"
 #include "lex.h"
 #include "ast.h"
 #include "parse.h"
 
 // source
 #include "common.c"
+#include "error.c"
 #include "lex.c"
 #include "ast.c"
 #include "parse.c"

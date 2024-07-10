@@ -1,1 +1,3 @@
-fn hello(t:(u32, i32, u8)) {}
+fn do_work<T(times: u32) {
+    
+}

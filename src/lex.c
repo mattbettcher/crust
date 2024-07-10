@@ -689,9 +689,42 @@ match_token(TokenKind kind) {
 }
 
 static bool 
-expect_token(TokenKind kind) {
+expect_token(TokenKind kind, TokenKind *next_token_kind, bool is_recoverable) {
     if (is_token(kind)) {
         next_token();
+        return true;
+    } else if (is_recoverable) {
+        Error err = {
+            .kind = ERROR_EXPECTED,
+            .pos = token.pos,
+            .corrected = true,
+            .expected = {
+                .expected_token = kind,
+                .found_token = token.kind,
+            }
+        };
+        u8 i = 0;
+        while (next_token_kind[i]) {
+            if (is_token(next_token_kind[i])) {
+                // assume expected token is just missing and the next token is
+                // of the expected kind
+                goto end;
+            }
+            i++;
+        }
+        // assume token is wrong and consume it
+        Token wrong_token = token;
+        next_token();
+        i = 0;
+        while (next_token_kind[i]) {
+            if (is_token(next_token_kind[i])) {
+                // we found a correct token carry on
+                goto end;
+            }
+            i++;
+        }
+        end:
+        buf_push(errors, err);
         return true;
     } else {
         fatal_error_here("Expected token %s, got %s", token_kind_name(kind), token_info());
